@@ -102,6 +102,56 @@
       background: #fff7e1;
       border-color: var(--flag);
     }
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--muted);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle .switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      background: #cfd6de;
+      border-radius: 999px;
+      transition: background 0.2s ease;
+      flex: 0 0 auto;
+    }
+    .toggle .switch::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .toggle input:checked + .switch {
+      background: var(--accent);
+    }
+    .toggle input:checked + .switch::after {
+      transform: translateX(16px);
+    }
+    .toggle-text {
+      font-weight: 600;
+      color: var(--text);
+    }
     .hint {
       font-size: 13px;
       color: var(--muted);
@@ -222,6 +272,15 @@
       color: var(--muted);
       margin-left: 34px;
     }
+    .hide-letters .option-letter {
+      display: none;
+    }
+    .hide-letters .option-main {
+      grid-template-columns: 20px 1fr;
+    }
+    .hide-letters .option-tag {
+      margin-left: 30px;
+    }
     @media (max-width: 640px) {
       .q-header {
         flex-direction: column;
@@ -244,6 +303,11 @@
   </header>
   <div class="wrap">
     <div class="toolbar">
+      <label class="toggle" for="toggle-letters">
+        <input type="checkbox" id="toggle-letters" />
+        <span class="switch" aria-hidden="true"></span>
+        <span class="toggle-text" id="letters-text">Literki: ON</span>
+      </label>
       <button class="btn warn" id="toggle-mode">Tryb: Quiz</button>
       <button class="btn" id="new-attempt">Nowa próba (losuj odpowiedzi)</button>
       <button class="btn primary" id="show-results">Sprawdź wynik</button>
@@ -266,6 +330,7 @@
     const KEY_STORAGE = 'rpis_answer_key_v1';
     const ATTEMPT_KEY = 'rpis_attempt_v1';
     const MODE_KEY = 'rpis_mode_v1';
+    const LETTERS_KEY = 'rpis_show_letters_v1';
 
     function loadJSON(key, fallback) {
       try {
@@ -325,11 +390,14 @@
     let answerKey = loadJSON(KEY_STORAGE, {});
     let attempt = loadJSON(ATTEMPT_KEY, null) || createAttempt();
     let mode = loadJSON(MODE_KEY, 'quiz');
+    let showLetters = loadJSON(LETTERS_KEY, true);
+    if (typeof showLetters !== 'boolean') showLetters = true;
 
     function saveAll() {
       saveJSON(KEY_STORAGE, answerKey);
       saveJSON(ATTEMPT_KEY, attempt);
       saveJSON(MODE_KEY, mode);
+      saveJSON(LETTERS_KEY, showLetters);
     }
 
     function getQuestionOrder() {
@@ -424,6 +492,7 @@
     function render() {
       const root = document.getElementById('quiz');
       root.innerHTML = '';
+      applyLetterVisibility();
 
       const modeBtn = document.getElementById('toggle-mode');
       const hint = document.getElementById('mode-hint');
@@ -527,6 +596,14 @@
       if (el) el.textContent = message || '';
     }
 
+    function applyLetterVisibility() {
+      document.body.classList.toggle('hide-letters', !showLetters);
+      const toggle = document.getElementById('toggle-letters');
+      if (toggle) toggle.checked = showLetters;
+      const label = document.getElementById('letters-text');
+      if (label) label.textContent = showLetters ? 'Literki: ON' : 'Literki: OFF';
+    }
+
     document.getElementById('toggle-mode').addEventListener('click', () => {
       setMode(mode === 'edit' ? 'quiz' : 'edit');
     });
@@ -544,6 +621,12 @@
       attempt.showResults = true;
       saveAll();
       render();
+    });
+
+    document.getElementById('toggle-letters').addEventListener('change', (event) => {
+      showLetters = event.target.checked;
+      saveAll();
+      applyLetterVisibility();
     });
 
     document.getElementById('clear-key').addEventListener('click', () => {
