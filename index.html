@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rachunek Prawdopodobieństwa – Quiz</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #1f2d3d;
+      --muted: #6b7785;
+      --line: #e6e9ee;
+      --accent: #34c6d5;
+      --accent-dark: #249cab;
+      --flag: #f2b01e;
+      --ok: #e9f7ef;
+      --ok-border: #9bd5b3;
+      --bad: #fdecea;
+      --bad-border: #f2a7a0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.45;
+    }
+    header {
+      max-width: 1024px;
+      margin: 24px auto 8px;
+      padding: 0 20px;
+    }
+    header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 6px;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .wrap {
+      max-width: 1024px;
+      margin: 16px auto 40px;
+      padding: 0 20px 20px;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .keybar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .key-input {
+      flex: 1 1 360px;
+      min-width: 220px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      background: #fff;
+      color: var(--text);
+    }
+    .key-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(52, 198, 213, 0.15);
+    }
+    .key-status {
+      font-size: 12px;
+      color: var(--muted);
+      min-height: 16px;
+    }
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn:hover {
+      border-color: var(--accent);
+    }
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .btn.warn {
+      background: #fff7e1;
+      border-color: var(--flag);
+    }
+    .hint {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 6px 0 12px;
+    }
+    .summary {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin: 10px 0 16px;
+      font-size: 14px;
+    }
+    .summary.hidden {
+      display: none;
+    }
+    .question-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      margin-bottom: 18px;
+      overflow: hidden;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    }
+    .card-top {
+      height: 10px;
+      background: var(--accent);
+    }
+    .card-body {
+      padding: 18px 18px 12px;
+    }
+    .q-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+    .q-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .q-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+    .q-flag {
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+    }
+    .q-flag.active {
+      color: var(--text);
+      border-color: var(--flag);
+      background: #fff7e1;
+    }
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+    .option {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: start;
+      gap: 10px;
+      padding: 8px 6px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+    }
+    .option:hover {
+      background: #f7f9fb;
+    }
+    .option.is-correct {
+      background: var(--ok);
+      border-color: var(--ok-border);
+    }
+    .option.is-wrong {
+      background: var(--bad);
+      border-color: var(--bad-border);
+    }
+    .option-main {
+      display: grid;
+      grid-template-columns: 20px 24px 1fr;
+      gap: 10px;
+      align-items: start;
+      cursor: pointer;
+      user-select: none;
+    }
+    .option input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin-top: 3px;
+      accent-color: var(--accent-dark);
+    }
+    .option-letter {
+      font-weight: 600;
+      color: var(--text);
+    }
+    .option-text {
+      font-size: 14px;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .option-tag {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 34px;
+    }
+    @media (max-width: 640px) {
+      .q-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Rachunek Prawdopodobieństwa – Quiz</h1>
+    <p>Najpierw ustaw poprawne odpowiedzi, potem przełącz na tryb quizu i zrób próbę z losową kolejnością.</p>
+  </header>
+  <div class="wrap">
+    <div class="toolbar">
+      <button class="btn warn" id="toggle-mode">Tryb: Quiz</button>
+      <button class="btn" id="new-attempt">Nowa próba (losuj odpowiedzi)</button>
+      <button class="btn primary" id="show-results">Sprawdź wynik</button>
+      <button class="btn" id="clear-key">Usuń klucz odpowiedzi</button>
+      <button class="btn" id="reset-answers">Wyczyść zaznaczenia</button>
+    </div>
+    <div class="keybar">
+      <input class="key-input" id="answer-key-input" type="text" placeholder="Wklej klucz odpowiedzi lub wygeneruj nowy…" />
+      <button class="btn" id="generate-key">Generuj klucz</button>
+      <button class="btn" id="load-key">Wczytaj klucz</button>
+    </div>
+    <div class="key-status" id="key-status"></div>
+    <div class="hint" id="mode-hint"></div>
+    <div class="summary hidden" id="summary"></div>
+    <div id="quiz"></div>
+  </div>
+
+  <script>
+    const data = [{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Jeżeli \\(\\{H_1, H_2, \\ldots, H_n\\}\\) jest rozbiciem przestrzeni zdarzeń elementarnych \\(\\Omega\\) na zdarzenia o dodatnim prawdopodobieństwie, to dla dowolnego zdarzenia \\(A\\) jest\n\\[\nP(A) = \\sum_{i=1}^n P(H_i \\mid A) P(H_i).\n\\]"},{"letter":"B","text":"Jeżeli \\(\\{H_1, H_2, \\ldots, H_n\\}\\) jest rozbiciem przestrzeni zdarzeń elementarnych \\(\\Omega\\) na zdarzenia o dodatnim prawdopodobieństwie, to dla dowolnego zdarzenia \\(A\\) jest\n\\[\n\\forall_{i=1,2,\\ldots,n}\\; P(H_i) = \\sum_{i=1}^n P(A \\mid H_i) P(A).\n\\]"},{"letter":"C","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"D","text":"Jeżeli \\(\\{H_1, H_2, \\ldots, H_n\\}\\) jest rozbiciem przestrzeni zdarzeń elementarnych \\(\\Omega\\) na zdarzenia o dodatnim prawdopodobieństwie, to dla dowolnego zdarzenia \\(A\\) jest\n\\[\nP(A) = \\sum_{i=1}^n P(A \\mid H_i) P(A).\n\\]"},{"letter":"E","text":"Jeżeli \\(\\{H_1, H_2, \\ldots, H_n\\}\\) jest rozbiciem przestrzeni zdarzeń elementarnych \\(\\Omega\\) na zdarzenia o dodatnim prawdopodobieństwie, to dla dowolnego zdarzenia \\(A\\) jest\n\\[\n\\forall_{i=1,2,\\ldots,n}\\; P(H_i) = \\sum_{i=1}^n P(A \\mid H_i) P(H_i).\n\\]"},{"letter":"F","text":"Jeżeli \\(\\{H_1, H_2, \\ldots, H_n\\}\\) jest rozbiciem przestrzeni zdarzeń elementarnych \\(\\Omega\\) na zdarzenia o dodatnim prawdopodobieństwie, to dla dowolnego zdarzenia \\(A\\) jest\n\\[\nP(A) = \\sum_{i=1}^n P(A \\mid H_i) P(H_i).\n\\]"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"B","text":"Prawdopodobieństwem warunkowym zajścia zdarzenia \\(B\\) pod warunkiem zajścia zdarzenia \\(A\\), gdzie \\(P(B) > 0\\), jest liczba\n\\[\nP(A \\mid B) = \\frac{P(A \\cup B)}{P(B)}.\n\\]"},{"letter":"C","text":"Prawdopodobieństwem warunkowym zajścia zdarzenia \\(B\\) pod warunkiem zajścia zdarzenia \\(A\\), gdzie \\(P(A \\cup B) > 0\\), jest liczba\n\\[\nP(A \\mid B) = \\frac{P(B)}{P(A \\cup B)}.\n\\]"},{"letter":"D","text":"Prawdopodobieństwem warunkowym zajścia zdarzenia \\(B\\) pod warunkiem zajścia zdarzenia \\(A\\), gdzie \\(P(B) > 0\\), jest liczba\n\\[\nP(A \\mid B) = \\frac{P(B)}{P(A \\cap B)}.\n\\]"},{"letter":"E","text":"Prawdopodobieństwem warunkowym zajścia zdarzenia \\(B\\) pod warunkiem zajścia zdarzenia \\(A\\), gdzie \\(P(A \\cup B) > 0\\), jest liczba\n\\[\nP(A \\mid B) = \\frac{P(A \\cap B)}{P(A \\cup B)}.\n\\]"},{"letter":"F","text":"Prawdopodobieństwem warunkowym zajścia zdarzenia \\(B\\) pod warunkiem zajścia zdarzenia \\(A\\), gdzie \\(P(B) > 0\\), jest liczba\n\\[\nP(A \\mid B) = \\frac{P(A \\cap B)}{P(B)}.\n\\]"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Wariancją dyskretnej zmiennej losowej \\(X\\) nazywamy wyrażenie\n\\[\nD^2(X) = E\\!\\left[X^2 - E(X)\\right]^2 = \\sum_i \\left[x_i^2 - E(X)\\right]^2 p_i,\n\\]\ngdzie \\(p_i\\) oznacza funkcję prawdopodobieństwa zmiennej losowej \\(X\\) przyjmującej wartości \\(x_i\\), \\(i = 1,2,\\ldots\\)."},{"letter":"B","text":"Momentem zwykłym (momentem) rzędu \\(k\\), \\(k = 1,2,\\ldots\\) dyskretnej zmiennej losowej \\(X\\) nazywamy wartość oczekiwaną \\(k\\)-tej potęgi tej zmiennej, tj.\n\\[\nm_k = E(X^k) = \\sum_i x_i^k p_i.\n\\]"},{"letter":"C","text":"Momentem zwykłym (momentem) rzędu \\(k\\), \\(k = 1,2,\\ldots\\) dyskretnej zmiennej losowej \\(X\\) nazywamy wartość oczekiwaną funkcji \\(g(x) = [X - E(X)]^k\\) tej zmiennej, tj.\n\\[\n\\mu_k = E\\!\\left[X - E(X)\\right]^k = \\sum_i \\left[x_i - E(X)\\right]^k p_i.\n\\]"},{"letter":"D","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"E","text":"Wariancją dyskretnej zmiennej losowej \\(X\\) nazywamy wyrażenie\n\\[\nD^2(X) = E\\!\\left[X - E(X)\\right]^2 = \\sum_i \\left[x_i - E(X)\\right]^2 p_i,\n\\]\ngdzie \\(p_i\\) oznacza funkcję prawdopodobieństwa zmiennej losowej \\(X\\) przyjmującej wartości \\(x_i\\), \\(i = 1,2,\\ldots\\)."},{"letter":"F","text":"Momentem centralnym rzędu \\(k\\), \\(k = 1,2,\\ldots\\) ciągłej zmiennej losowej \\(X\\) nazywamy wartość oczekiwaną \\(k\\)-tej potęgi tej zmiennej, tj.\n\\[\nm_k = E(X^k) = \\int_{-\\infty}^{+\\infty} x^k f(x)\\,dx.\n\\]"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Prawdopodobieństwem warunkowym zajścia zdarzenia \\(B\\) pod warunkiem zajścia zdarzenia \\(A\\), gdzie \\(P(B) > 0\\), jest liczba\n\\[\nP(A \\mid B) = \\frac{P(A \\cap B)}{P(B)}.\n\\]"},{"letter":"B","text":"Prawdopodobieństwem warunkowym zajścia zdarzenia \\(B\\) pod warunkiem zajścia zdarzenia \\(A\\), gdzie \\(P(B) > 0\\), jest liczba\n\\[\nP(A \\mid B) = \\frac{P(A \\cup B)}{P(B)}.\n\\]"},{"letter":"C","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"D","text":"Prawdopodobieństwem warunkowym zajścia zdarzenia \\(B\\) pod warunkiem zajścia zdarzenia \\(A\\), gdzie \\(P(A \\cup B) > 0\\), jest liczba\n\\[\nP(A \\mid B) = \\frac{P(A \\cap B)}{P(A \\cup B)}.\n\\]"},{"letter":"E","text":"Prawdopodobieństwem warunkowym zajścia zdarzenia \\(B\\) pod warunkiem zajścia zdarzenia \\(A\\), gdzie \\(P(A \\cup B) > 0\\), jest liczba\n\\[\nP(A \\mid B) = \\frac{P(B)}{P(A \\cup B)}.\n\\]"},{"letter":"F","text":"Prawdopodobieństwem warunkowym zajścia zdarzenia \\(B\\) pod warunkiem zajścia zdarzenia \\(A\\), gdzie \\(P(B) > 0\\), jest liczba\n\\[\nP(A \\mid B) = \\frac{P(B)}{P(A \\cap B)}.\n\\]"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Zdarzenie \\(A = \\varnothing\\) jest zdarzeniem niemożliwym."},{"letter":"B","text":"Zdarzeniem jest każdy podzbiór przestrzeni zdarzeń elementarnych."},{"letter":"C","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"D","text":"Jeżeli prawdopodobieństwo każdego zdarzenia elementarnego z przestrzeni \\(\\Omega\\) jest jednakowe, to\n\\[\n\\forall_{A \\subseteq \\Omega}\\; P(A) = \\frac{|A|}{|\\Omega|}.\n\\]\nTak określone prawdopodobieństwo nazywane jest prawdopodobieństwem klasycznym."},{"letter":"E","text":"Zdarzeniem jest każdy element zbioru potęgowego przestrzeni zdarzeń elementarnych."},{"letter":"F","text":"Jeżeli prawdopodobieństwa co najmniej dwóch zdarzeń elementarnych z przestrzeni \\(\\Omega\\) różnią się od siebie, czyli może nie zachodzić zależność\n\\[\n\\forall_{A \\subseteq \\Omega}\\; P(A) = \\frac{|A|}{|\\Omega|},\n\\]\nto tak określone prawdopodobieństwo nazywane jest prawdopodobieństwem klasycznym."}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Kowariancją zmiennych losowych \\(X_1\\) i \\(X_2\\), spełniających warunek \\(E(|X_1 \\cdot X_2|) < \\infty\\), jest wielkość\n\\[\n\\operatorname{cov}(X_1, X_2) = E\\!\\left[(X_1 - E(X_1)) \\cdot (X_2 - E(X_2))\\right].\n\\]"},{"letter":"B","text":"Współczynnikiem korelacji zmiennych losowych \\(X_1\\) i \\(X_2\\) jest wielkość\n\\[\n\\rho(X_1, X_2) = \\frac{\\operatorname{cov}(X_1, X_2)}{\\sqrt{D^2(X_1) + D^2(X_2)}}, \\quad D^2(X_1), D^2(X_2) > 0.\n\\]"},{"letter":"C","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"D","text":"Kowariancją zmiennych losowych \\(X_1\\) i \\(X_2\\), spełniających warunek \\(E(|X_1 \\cdot X_2|) < \\infty\\), jest wielkość\n\\[\n\\operatorname{cov}(X_1, X_2) = E\\!\\left[(X_1 + E(X_1)) \\cdot (X_2 - E(X_2))\\right].\n\\]"},{"letter":"E","text":"Współczynnikiem korelacji zmiennych losowych \\(X_1\\) i \\(X_2\\) jest wielkość\n\\[\n\\rho(X_1, X_2) = \\frac{\\operatorname{cov}(X_1, X_2)}{\\sqrt{D^2(X_1)\\cdot D^2(X_2)}}, \\quad D^2(X_1), D^2(X_2) > 0.\n\\]"},{"letter":"F","text":"Kowariancją zmiennych losowych \\(X_1\\) i \\(X_2\\), spełniających warunek \\(E(|X_1 \\cdot X_2|) < \\infty\\), jest wielkość\n\\[\n\\operatorname{cov}(X_1, X_2) = E\\!\\left[(X_1 - E(X_1)) \\cdot (X_2 + E(X_2))\\right].\n\\]"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Wartością oczekiwaną dyskretnej zmiennej losowej \\(X\\) jest wyrażenie  \n\\[\nE(X) = \\sum_i x_i^2 p_i,\n\\]\ngdzie \\(p_i\\) oznacza funkcję prawdopodobieństwa zmiennej losowej \\(X\\) przyjmującej wartości \\(x_i\\), \\(i = 1,2,\\dots\\)."},{"letter":"B","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"C","text":"Wartością oczekiwaną dyskretnej zmiennej losowej \\(X\\) jest wyrażenie  \n\\[\nE(X) = \\sum_i \\frac{x_i}{p_i},\n\\]\ngdzie \\(p_i\\) oznacza funkcję prawdopodobieństwa zmiennej losowej \\(X\\) przyjmującej wartości \\(x_i\\), \\(i = 1,2,\\dots\\)."},{"letter":"D","text":"Prawdziwa jest równość  \n\\[\nE(aX + b) = aE(X) + b,\n\\]\ngdzie \\(X\\) jest zmienną losową, a \\(a, b\\) są stałymi."},{"letter":"E","text":"Wartością oczekiwaną dyskretnej zmiennej losowej \\(X\\) jest wyrażenie  \n\\[\nE(X) = \\sum_i x_i p_i,\n\\]\ngdzie \\(p_i\\) oznacza funkcję prawdopodobieństwa zmiennej losowej \\(X\\) przyjmującej wartości \\(x_i\\), \\(i = 1,2,\\dots\\)."},{"letter":"F","text":"Prawdziwa jest równość  \n\\[\nX - E(X) = \\frac{1}{E(X)},\n\\]\ngdzie \\(X\\) jest zmienną losową."}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Jeżeli \\(A \\subseteq \\Omega\\), gdzie \\(\\Omega\\) jest przestrzenią zdarzeń elementarnych, to  \n\\[\nA_1 = \\Omega \\setminus (\\Omega \\cup A)\n\\]\njest zdarzeniem niemożliwym."},{"letter":"B","text":"Jeżeli \\(A \\subseteq \\Omega\\), gdzie \\(\\Omega\\) jest przestrzenią zdarzeń elementarnych, to  \n\\[\nA_1 = \\Omega \\setminus (\\Omega \\cap A)\n\\]\njest dopełnieniem zdarzenia \\(A\\)."},{"letter":"C","text":"Zdarzenie \\(A\\) takie, że  \n\\[\n\\overline{A} = \\Omega\n\\]\njest zdarzeniem niemożliwym."},{"letter":"D","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"E","text":"Jeżeli \\(A \\subseteq \\Omega\\), gdzie \\(\\Omega\\) jest przestrzenią zdarzeń elementarnych, to  \n\\[\nA_1 = \\Omega \\cap A\n\\]\njest dopełnieniem zdarzenia \\(A\\)."},{"letter":"F","text":"Jeżeli \\(A \\subseteq \\Omega\\), gdzie \\(\\Omega\\) jest przestrzenią zdarzeń elementarnych, to  \n\\[\n\\overline{A} = \\Omega \\setminus A\n\\]\njest zdarzeniem przeciwnym zdarzenia \\(A\\)."}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Dla dowolnej przestrzeni zdarzeń elementarnych \\(\\Omega\\) zachodzi  \n\\[\nP(\\Omega) \\in (0,1).\n\\]"},{"letter":"B","text":"Dla dowolnej przestrzeni zdarzeń elementarnych \\(\\Omega\\) zachodzi  \n\\[\nP(\\Omega) = 1.\n\\]"},{"letter":"C","text":"Dla dowolnej przestrzeni zdarzeń elementarnych \\(\\Omega\\) zachodzi  \n\\[\nP(\\Omega) \\in [0,1).\n\\]"},{"letter":"D","text":"Dla dowolnej przestrzeni zdarzeń elementarnych \\(\\Omega\\) zachodzi  \n\\[\nP(\\Omega) \\in (0,1].\n\\]"},{"letter":"E","text":"Dla dowolnej przestrzeni zdarzeń elementarnych \\(\\Omega\\) zachodzi  \n\\[\nP(\\Omega) = [0,1].\n\\]"},{"letter":"F","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"B","text":"Jeżeli \\(\\{H_i\\}_{i \\in I}\\) jest przeliczalnym rozbiciem \\(\\Omega\\) na zdarzenia o dodatnim prawdopodobieństwie oraz \\(P(A) > 0\\), to dla dowolnego \\(j \\in I\\) zachodzi  \n\\[\nP(A \\mid H_j) = \\frac{P(A \\mid H_j) P(H_j)}{\\sum_{i \\in I} P(A \\mid H_i) P(H_i)}.\n\\]"},{"letter":"C","text":"Jeżeli \\(\\{H_i\\}_{i \\in I}\\) jest przeliczalnym rozbiciem \\(\\Omega\\) na zdarzenia o dodatnim prawdopodobieństwie oraz \\(P(A) > 0\\), to dla dowolnego \\(j \\in I\\) zachodzi  \n\\[\nP(H_j \\mid A) = \\frac{P(A \\mid H_i) P(H_i)}{\\sum_{i \\in I} P(A \\mid H_j) P(H_j)}.\n\\]"},{"letter":"D","text":"Jeżeli \\(\\{H_i\\}_{i \\in I}\\) jest przeliczalnym rozbiciem \\(\\Omega\\) na zdarzenia o dodatnim prawdopodobieństwie oraz \\(P(A) > 0\\), to dla dowolnego \\(j \\in I\\) zachodzi  \n\\[\nP(H_j \\mid A) = \\frac{P(A \\mid H_j) P(H_j)}{\\sum_{i \\in I} P(A \\mid H_i) P(A)}.\n\\]"},{"letter":"E","text":"Jeżeli \\(\\{H_i\\}_{i \\in I}\\) jest przeliczalnym rozbiciem \\(\\Omega\\) na zdarzenia o dodatnim prawdopodobieństwie oraz \\(P(A) > 0\\), to dla dowolnego \\(j \\in I\\) zachodzi  \n\\[\nP(H_j \\mid A) = \\frac{P(A \\mid H_j) P(A)}{\\sum_{i \\in I} P(A \\mid H_i) P(H_i)}.\n\\]"},{"letter":"F","text":"Jeżeli \\(\\{H_i\\}_{i \\in I}\\) jest przeliczalnym rozbiciem \\(\\Omega\\) na zdarzenia o dodatnim prawdopodobieństwie oraz \\(P(A) > 0\\), to dla dowolnego \\(j \\in I\\) zachodzi  \n\\[\nP(H_j \\mid A) = \\frac{P(A \\mid H_j) P(H_j)}{\\sum_{i \\in I} P(A \\mid H_i) P(H_i)}.\n\\]"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Zmienna losowa \\(X\\) ma rozkład dyskretny, jeżeli istnieje zbiór przeliczalny \\(S \\subset \\mathbb{R}\\) taki, że  \n\\[\nP_X(S) = 1.\n\\]"},{"letter":"B","text":"Zmienna losowa \\(Y\\) ma rozkład ciągły, jeżeli istnieje taka funkcja  \n\\[\nf : \\mathbb{N} \\to \\mathbb{N},\n\\]\nże  \n\\[\nP_Y(A) = \\int_A f(x)\\,dx, \\quad A \\in \\mathcal{B}(\\mathbb{R}^n).\n\\]"},{"letter":"C","text":"Zmienna losowa \\(X\\) ma rozkład ciągły, jeżeli istnieje zbiór przeliczalny \\(S \\subset \\mathbb{R}\\) taki, że  \n\\[\nP_X(S) = 1.\n\\]"},{"letter":"D","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"E","text":"Rozkładem prawdopodobieństwa zmiennej losowej \\(X\\) nazywamy prawdopodobieństwo \\(P_X\\) określone na \\(\\mathcal{B}(\\mathbb{R})\\) zależnością  \n\\[\nP_X(B) = P(X(B)), \\quad B \\in \\mathcal{B}(\\mathbb{R}).\n\\]"},{"letter":"F","text":"Rozkładem prawdopodobieństwa zmiennej losowej \\(X\\) nazywamy prawdopodobieństwo \\(P_X\\) określone na \\(\\mathcal{B}(\\mathbb{R})\\) zależnością  \n\\[\nP_X(B) = P(X^{-1}(B)), \\quad B \\in \\mathcal{B}(\\mathbb{R}).\n\\]"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Jeżeli \\(X_1, X_2, \\ldots, X_n\\) są niezależnymi zmiennymi losowymi, z których każda ma wariancję, to istnieje wariancja sumy tych zmiennych losowych i jest ona równa\n\\[\nD^2\\!\\left(\\sum_{i=1}^n X_i\\right) = \\sum_{i=1}^n D^2(X_i).\n\\]"},{"letter":"B","text":"Przestrzeń zdarzeń elementarnych nazywamy dyskretną, jeżeli jest zbiorem skończonym lub przeliczalnym."},{"letter":"C","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"D","text":"Prawdopodobieństwo \\(P(A)\\) zdarzenia \\(A \\subseteq \\Omega\\) (gdzie \\(\\Omega\\) jest przestrzenią zdarzeń elementarnych) jest iloczynem prawdopodobieństw wszystkich zdarzeń elementarnych w tym zdarzeniu."},{"letter":"E","text":"Prawdopodobieństwo \\(P(A)\\) zdarzenia \\(A \\subseteq \\Omega\\) (gdzie \\(\\Omega\\) jest przestrzenią zdarzeń elementarnych) jest sumą prawdopodobieństw wszystkich zdarzeń elementarnych w tym zdarzeniu."},{"letter":"F","text":"Przestrzeń zdarzeń elementarnych nazywamy dyskretną, jeżeli jest zbiorem nieprzeliczalnym."}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Warunkowa wartość oczekiwana zmiennej losowej \\(X_2\\) pod warunkiem zmiennej losowej \\(X_1\\) określona jest jako\n\\[\nE(X_2 \\mid X_1) = E(X_2 \\mid X_1 = x).\n\\]"},{"letter":"B","text":"Warunkowa wartość oczekiwana zmiennej losowej \\(X_2\\) pod warunkiem zmiennej losowej \\(X_1\\) określona jest jako\n\\[\nE(X_1 \\mid X_2) = E(X_1 = x \\mid X_2).\n\\]"},{"letter":"C","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"D","text":"Warunkowa wartość oczekiwana zmiennej losowej \\(X_1\\) pod warunkiem zmiennej losowej \\(X_2\\) określona jest jako\n\\[\nE(X_2 \\mid X_1) = E(X_2 = x_2 \\mid X_1 = x_1).\n\\]"},{"letter":"E","text":"Warunkowa wartość oczekiwana zmiennej losowej \\(X_2\\) pod warunkiem zmiennej losowej \\(X_1\\) określona jest jako\n\\[\nE(X_2 \\mid X_1) = E(X_1 \\mid X_2 = x).\n\\]"},{"letter":"F","text":"Warunkowa wartość oczekiwana zmiennej losowej \\(X_2\\) pod warunkiem zmiennej losowej \\(X_1\\) określona jest jako\n\\[\nE(X_2 \\mid X_1) = E(X_1 = x_1 \\mid X_2 = x_2).\n\\]"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Przestrzeń zdarzeń elementarnych to zbiór potęgowy zbioru możliwych wyników danego doświadczenia losowego."},{"letter":"B","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"C","text":"Przestrzeń zdarzeń elementarnych to zbiór wszystkich możliwych wyników danego doświadczenia losowego."},{"letter":"D","text":"Zdarzenia elementarne to możliwe wyniki danego doświadczenia losowego."},{"letter":"E","text":"Przestrzeń zdarzeń elementarnych to zbiór wszystkich podzbiorów zbioru możliwych wyników danego doświadczenia losowego."},{"letter":"F","text":"Zdarzenia elementarne to zbiory możliwych wyników danego doświadczenia losowego."}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Dystrybuanta zmiennej losowej jest funkcją nierosnącą."},{"letter":"B","text":"Dystrybuantą zmiennej losowej \\(X : \\Omega \\to \\mathbb{R}\\) jest funkcja\n\\[\nF : \\mathbb{R} \\to \\Omega\n\\]\nokreślona zależnością\n\\[\nF(x) = P(X \\le x).\n\\]"},{"letter":"C","text":"Dystrybuantą zmiennej losowej \\(X : \\Omega \\to \\mathbb{R}\\) jest funkcja\n\\[\nF : \\mathbb{R} \\to \\mathbb{R}\n\\]\nokreślona zależnością\n\\[\nF(x) = P(X > x).\n\\]"},{"letter":"D","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"E","text":"Dystrybuantą zmiennej losowej \\(X : \\Omega \\to \\mathbb{R}\\) jest funkcja\n\\[\nF : \\mathbb{R} \\to \\mathbb{R}\n\\]\nokreślona zależnością\n\\[\nF(x) = P(X \\le x).\n\\]"},{"letter":"F","text":"Jeżeli dystrybuanta zmiennej losowej \\(X\\) ma w punkcie \\(x\\) skok o wielkości \\(d\\), to\n\\[\nP(X = x) = \\frac{d}{2}.\n\\]"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Dystrybuantą 2-wymiarowej zmiennej losowej \\((X, Y)\\) o wartościach w \\(\\mathbb{R}^2\\) nazywamy funkcję\n\\[\nF_{(X,Y)} : \\mathbb{R}^2 \\to \\mathbb{R}\n\\]\nokreśloną zależnością\n\\[\nF_{(X,Y)}(x,y) = P(X \\le x, Y > y) = P_{(X,Y)}((-\\infty, x] \\times (y, \\infty)).\n\\]"},{"letter":"B","text":"Rozkładem prawdopodobieństwa zmiennej losowej o wartościach w \\(\\mathbb{R}^n\\) nazywamy rozkład prawdopodobieństwa \\(P_X\\) określony na \\(\\mathcal{B}(\\mathbb{R}^n)\\) zależnością\n\\[\nP_X(B) = P(X(B)), \\quad B \\in \\mathcal{B}(\\mathbb{R}^n).\n\\]"},{"letter":"C","text":"Rozkładem prawdopodobieństwa zmiennej losowej o wartościach w \\(\\mathbb{R}^n\\) nazywamy rozkład prawdopodobieństwa \\(P_X\\) określony na \\(\\mathcal{B}(\\mathbb{R}^n)\\) zależnością\n\\[\nP_X(B) = P(X^{-1}(B)), \\quad B \\in \\mathcal{B}(\\mathbb{R}^n).\n\\]"},{"letter":"D","text":"Jeżeli \\(X_1 : \\Omega \\to \\mathbb{R}, X_2 : \\Omega \\to \\mathbb{R}, \\ldots, X_n : \\Omega \\to \\mathbb{R}\\) są zmiennymi losowymi, to wektor\n\\[\nX = (X_1, X_2, \\ldots, X_n)\n\\]\nnazywa się wektorem losowym lub \\(n\\)-wymiarową zmienną losową."},{"letter":"E","text":"Dystrybuantą 2-wymiarowej zmiennej losowej \\((X, Y)\\) o wartościach w \\(\\mathbb{R}^2\\) nazywamy funkcję\n\\[\nF_{(X,Y)} : \\mathbb{R}^2 \\to \\mathbb{R}\n\\]\nokreśloną zależnością\n\\[\nF_{(X,Y)}(x,y) = P(X \\le x, Y \\le y) = P_{(X,Y)}((-\\infty, x] \\times (-\\infty, y]).\n\\]"},{"letter":"F","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Zmienne losowe $X_1, X_2, \\ldots, X_n$ o wartościach w $\\mathbb{R}$, określone na $(\\Omega, \\mathcal{F}, P)$ są zmiennymi losowymi niezależnymi, gdy dla pewnych ciągów zbiorów borelowskich $B_1, B_2, \\ldots, B_n$ zachodzi równość  \n$$\nP(X_1 \\in B_1, X_2 \\in B_2, \\ldots, X_n \\in B_n) = P(X_1 \\in B_1)\\cdot P(X_2 \\in B_2)\\cdots P(X_n \\in B_n).\n$$"},{"letter":"B","text":"Zmienne losowe $X_1, X_2, \\ldots, X_n$ o wartościach w $\\mathbb{R}$, określone na $(\\Omega, \\mathcal{F}, P)$ są zmiennymi losowymi niezależnymi, gdy dla każdego ciągu zbiorów borelowskich $B_1, B_2, \\ldots, B_n$ zachodzi równość  \n$$\nP(X_1 \\in B_1, X_2 \\in B_2, \\ldots, X_n \\in B_n) = P(X_1 \\in B_1) + P(X_2 \\in B_2) + \\ldots + P(X_n \\in B_n).\n$$"},{"letter":"C","text":"Zmienne losowe $X_1, X_2, \\ldots, X_n$ o wartościach w $\\mathbb{R}$, określone na $(\\Omega, \\mathcal{F}, P)$ są zmiennymi losowymi niezależnymi, gdy istnieje przynajmniej jeden ciąg zbiorów borelowskich $B_1, B_2, \\ldots, B_n$, dla którego zachodzi równość  \n$$\nP(X_1 \\in B_1, X_2 \\in B_2, \\ldots, X_n \\in B_n) = P(X_1 \\in B_1)\\cdot P(X_2 \\in B_2)\\cdots P(X_n \\in B_n).\n$$"},{"letter":"D","text":"Zmienne losowe $X_1, X_2, \\ldots, X_n$ o wartościach w $\\mathbb{R}$, określone na $(\\Omega, \\mathcal{F}, P)$ są zmiennymi losowymi niezależnymi, gdy dla każdego ciągu zbiorów borelowskich $B_1, B_2, \\ldots, B_n$ zachodzi równość  \n$$\nP(X_1 \\in B_1, X_2 \\in B_2, \\ldots, X_n \\in B_n) = P(X_1 \\in B_1)\\cdot P(X_2 \\in B_2)\\cdots P(X_n \\in B_n).\n$$"},{"letter":"E","text":"Zmienne losowe $X_1, X_2, \\ldots, X_n$ o wartościach w $\\mathbb{R}$, określone na $(\\Omega, \\mathcal{F}, P)$ są zmiennymi losowymi niezależnymi, gdy istnieje przynajmniej jeden ciąg zbiorów borelowskich $B_1, B_2, \\ldots, B_n$, dla którego zachodzi równość  \n$$\nP(X_1 \\in B_1, X_2 \\in B_2, \\ldots, X_n \\in B_n) = P(X_1 \\in B_1) + P(X_2 \\in B_2) + \\ldots + P(X_n \\in B_n).\n$$"},{"letter":"F","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Zdarzenia $A$ i $B$ są niezależne, gdy  \n$$\nP(A \\cap B) = P(A) + P(B).\n$$"},{"letter":"B","text":"Zdarzenia $A$ i $B$ są niezależne, gdy  \n$$\nP(A \\cup B) = P(A) + P(B).\n$$"},{"letter":"C","text":"Zdarzenia $A$ i $B$ są niezależne, gdy  \n$$\nP((A \\cap B) \\setminus \\overline{A}) = P(A)\\cdot P(B).\n$$"},{"letter":"D","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"E","text":"Zdarzenia $A$ i $B$ są niezależne, gdy  \n$$\nP(A \\cup B) = P(A)\\cdot P(B).\n$$"},{"letter":"F","text":"Zdarzenia $A$ i $B$ są niezależne, gdy  \n$$\nP(A \\cap B) = P(A)\\cdot P(B).\n$$"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Dla dowolnej przestrzeni zdarzeń elementarnych $\\Omega$ zachodzi  \n$$\nP(\\Omega) > 1.\n$$"},{"letter":"B","text":"Dla dowolnej przestrzeni zdarzeń elementarnych $\\Omega$ zachodzi  \n$$\nP(\\Omega) \\in (0,1).\n$$"},{"letter":"C","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"D","text":"Dla dowolnej przestrzeni zdarzeń elementarnych $\\Omega$ zachodzi  \n$$\nP(\\Omega) \\in [0,1).\n$$"},{"letter":"E","text":"Dla dowolnej przestrzeni zdarzeń elementarnych $\\Omega$ zachodzi  \n$$\nP(\\Omega) \\in \\mathbb{N} \\setminus \\{1\\}.\n$$"},{"letter":"F","text":"Dla dowolnej przestrzeni zdarzeń elementarnych $\\Omega$ zachodzi  \n$$\nP(\\Omega) < 1.\n$$"}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Funkcja $X:\\mathbb{R}\\to\\Omega$ jest zmienną losową o wartościach w $\\mathbb{R}$, jeżeli dla każdego $a\\in\\mathbb{R}$ zbiór  \n$$\nX^{-1}((-\\infty,a])\n$$\njest zdarzeniem."},{"letter":"B","text":"Funkcja $X:\\Omega\\to\\mathbb{R}$ jest zmienną losową o wartościach w $\\mathbb{R}$, jeżeli dla każdego $a\\in\\mathbb{R}$ zbiór  \n$$\nX^{-1}((-\\infty,a])\n$$\njest zdarzeniem."},{"letter":"C","text":"Funkcja $X(\\omega)$ przyporządkowująca każdemu zdarzeniu elementarnemu $\\omega\\in\\Omega$ liczbę naturalną jest zmienną losową."},{"letter":"D","text":"Funkcja $X(\\omega)$ przyporządkowująca każdemu zdarzeniu elementarnemu $\\omega\\in\\Omega$ liczbę rzeczywistą jest zmienną losową."},{"letter":"E","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"F","text":"Funkcja $X(A)$ przyporządkowująca każdemu zdarzeniu $A\\subseteq\\Omega$ liczbę rzeczywistą jest zmienną losową."}]},{"prompt":"Wśród poniższych zdań wskaż wszystkie zdania prawdziwe.","options":[{"letter":"A","text":"Jeżeli $X_1, X_2, \\ldots, X_n$ są niezależnymi zmiennymi losowymi, z których każda ma wartość oczekiwaną, to  \n$$\n\\mathbb{E}(X_1\\cdot X_2\\cdots X_n) = \\frac{1}{\\mathbb{E}(X_1)\\cdot \\mathbb{E}(X_2)\\cdots \\mathbb{E}(X_n)}.\n$$"},{"letter":"B","text":"Żadne z pozostałych zdań podanych w tym zadaniu nie jest prawdziwe."},{"letter":"C","text":"Jeżeli $X_1, X_2, \\ldots, X_n$ są niezależnymi zmiennymi losowymi, z których każda ma wartość oczekiwaną, to  \n$$\n\\mathbb{E}(X_1\\cdot X_2\\cdots X_n) = \\mathbb{E}(X_1)+\\mathbb{E}(X_2)+\\ldots+\\mathbb{E}(X_n).\n$$"},{"letter":"D","text":"Jeżeli $X_1, X_2, \\ldots, X_n$ są niezależnymi zmiennymi losowymi, z których przynajmniej niektóre mają wartość oczekiwaną, to  \n$$\n\\mathbb{E}(X_1\\cdot X_2\\cdots X_n) = \\mathbb{E}(X_1)+\\mathbb{E}(X_2)+\\ldots+\\mathbb{E}(X_n).\n$$"},{"letter":"E","text":"Jeżeli $X_1, X_2, \\ldots, X_n$ są niezależnymi zmiennymi losowymi, z których przynajmniej niektóre mają wartość oczekiwaną, to  \n$$\n\\mathbb{E}(X_1\\cdot X_2\\cdots X_n) = \\frac{1}{\\mathbb{E}(X_1)+\\mathbb{E}(X_2)+\\ldots+\\mathbb{E}(X_n)}.\n$$"},{"letter":"F","text":"Jeżeli $X_1, X_2, \\ldots, X_n$ są niezależnymi zmiennymi losowymi, z których każda ma wartość oczekiwaną, to  \n$$\n\\mathbb{E}(X_1\\cdot X_2\\cdots X_n) = \\frac{1}{\\mathbb{E}(X_1)}\\cdot\\frac{1}{\\mathbb{E}(X_2)}\\cdots\\frac{1}{\\mathbb{E}(X_n)}.\n$$"}]}];
+    const KEY_STORAGE = 'rpis_answer_key_v1';
+    const ATTEMPT_KEY = 'rpis_attempt_v1';
+    const MODE_KEY = 'rpis_mode_v1';
+
+    function loadJSON(key, fallback) {
+      try {
+        return JSON.parse(localStorage.getItem(key)) ?? fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJSON(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function encodeKey(obj) {
+      const json = JSON.stringify(obj || {});
+      const bytes = new TextEncoder().encode(json);
+      let binary = '';
+      bytes.forEach(b => { binary += String.fromCharCode(b); });
+      return `rpis1:${btoa(binary)}`;
+    }
+
+    function decodeKey(value) {
+      if (!value) return null;
+      let raw = value.trim();
+      if (raw.startsWith('rpis1:')) raw = raw.slice(6);
+      try {
+        const binary = atob(raw);
+        const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+        const json = new TextDecoder().decode(bytes);
+        const parsed = JSON.parse(json);
+        return parsed && typeof parsed === 'object' ? parsed : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function createAttempt() {
+      const baseOrder = data.map((_, idx) => idx);
+      return {
+        answers: {},
+        flags: {},
+        order: data.map(q => shuffle(q.options.map(o => o.letter))),
+        questionOrder: shuffle(baseOrder),
+        showResults: false
+      };
+    }
+
+    let answerKey = loadJSON(KEY_STORAGE, {});
+    let attempt = loadJSON(ATTEMPT_KEY, null) || createAttempt();
+    let mode = loadJSON(MODE_KEY, 'quiz');
+
+    function saveAll() {
+      saveJSON(KEY_STORAGE, answerKey);
+      saveJSON(ATTEMPT_KEY, attempt);
+      saveJSON(MODE_KEY, mode);
+    }
+
+    function getQuestionOrder() {
+      if (mode === 'edit') {
+        return data.map((_, idx) => idx);
+      }
+      const fallback = data.map((_, idx) => idx);
+      const order = Array.isArray(attempt.questionOrder) ? attempt.questionOrder : null;
+      if (!order || order.length !== data.length) {
+        attempt.questionOrder = shuffle(fallback);
+        saveAll();
+        return attempt.questionOrder;
+      }
+      return order;
+    }
+
+    function getOrderedOptions(qIndex) {
+      if (mode === 'edit') {
+        const map = new Map(data[qIndex].options.map(o => [o.letter, o]));
+        return ['A', 'B', 'C', 'D', 'E', 'F'].map(letter => map.get(letter)).filter(Boolean);
+      }
+      const fallback = data[qIndex].options.map(o => o.letter);
+      let order = attempt.order?.[qIndex];
+      if (!order || order.length !== fallback.length) {
+        order = shuffle(fallback);
+        if (!attempt.order) attempt.order = [];
+        attempt.order[qIndex] = order;
+        saveAll();
+      }
+      const map = new Map(data[qIndex].options.map(o => [o.letter, o]));
+      return order.map(letter => map.get(letter)).filter(Boolean);
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+      saveAll();
+      render();
+    }
+
+    function resetAttempt(shuffleOrder = false) {
+      if (shuffleOrder) {
+        attempt = createAttempt();
+      } else {
+        attempt.answers = {};
+        attempt.flags = {};
+        attempt.showResults = false;
+      }
+      saveAll();
+      render();
+    }
+
+    function computeResults() {
+      let total = 0;
+      let correct = 0;
+      let missingKey = 0;
+
+      data.forEach((q, qi) => {
+        const key = answerKey[qi] || {};
+        const hasKey = Object.keys(key).length > 0;
+        if (!hasKey) {
+          missingKey += 1;
+          return;
+        }
+
+        total += 1;
+        const answers = attempt.answers[qi] || {};
+        let ok = true;
+        q.options.forEach(opt => {
+          const k = !!key[opt.letter];
+          const a = !!answers[opt.letter];
+          if (k !== a) ok = false;
+        });
+        if (ok) correct += 1;
+      });
+
+      return { total, correct, missingKey };
+    }
+
+    function renderSummary() {
+      const summary = document.getElementById('summary');
+      if (mode === 'edit' || !attempt.showResults) {
+        summary.classList.add('hidden');
+        summary.textContent = '';
+        return;
+      }
+      const res = computeResults();
+      const pct = res.total ? Math.round((res.correct / res.total) * 100) : 0;
+      summary.classList.remove('hidden');
+      summary.textContent = `Wynik: ${res.correct}/${res.total} (${pct}%). Brak klucza dla ${res.missingKey} pytań.`;
+    }
+
+    function render() {
+      const root = document.getElementById('quiz');
+      root.innerHTML = '';
+
+      const modeBtn = document.getElementById('toggle-mode');
+      const hint = document.getElementById('mode-hint');
+      modeBtn.textContent = mode === 'edit' ? 'Tryb: Ustawianie poprawnych' : 'Tryb: Quiz';
+      hint.textContent = mode === 'edit'
+        ? 'Zaznacz poprawne odpowiedzi. Zmiany zapisują się automatycznie.'
+        : 'Wybierz odpowiedzi, a na koniec kliknij „Sprawdź wynik”.';
+
+      renderSummary();
+
+      const questionOrder = getQuestionOrder();
+
+      questionOrder.forEach((qIndex, displayIndex) => {
+        const q = data[qIndex];
+        const qState = attempt.answers[qIndex] || {};
+        const qFlag = attempt.flags[qIndex] || false;
+        const key = answerKey[qIndex] || {};
+        const showResults = attempt.showResults && mode === 'quiz' && Object.keys(key).length > 0;
+
+        const card = document.createElement('section');
+        card.className = 'question-card';
+        card.innerHTML = `
+          <div class="card-top"></div>
+          <div class="card-body">
+            <div class="q-header">
+              <div>
+                <div class="q-title">Pytanie ${displayIndex + 1}</div>
+                <div class="q-subtitle"></div>
+              </div>
+              <button class="q-flag" type="button" aria-pressed="${qFlag}">
+                Oflaguj pytanie
+              </button>
+            </div>
+            <div class="options"></div>
+          </div>
+        `;
+
+        card.querySelector('.q-subtitle').textContent = q.prompt;
+
+        const flagBtn = card.querySelector('.q-flag');
+        if (qFlag) flagBtn.classList.add('active');
+        flagBtn.addEventListener('click', () => {
+          attempt.flags[qIndex] = !attempt.flags[qIndex];
+          flagBtn.classList.toggle('active', attempt.flags[qIndex]);
+          flagBtn.setAttribute('aria-pressed', attempt.flags[qIndex]);
+          saveAll();
+        });
+
+        const optionsEl = card.querySelector('.options');
+        const ordered = getOrderedOptions(qIndex);
+
+        ordered.forEach((opt) => {
+          const optKey = opt.letter;
+          const optRow = document.createElement('div');
+          optRow.className = 'option';
+
+          const checked = mode === 'edit' ? !!key[optKey] : !!qState[optKey];
+
+          if (showResults) {
+            if (key[optKey]) optRow.classList.add('is-correct');
+            if (!key[optKey] && qState[optKey]) optRow.classList.add('is-wrong');
+          }
+
+          optRow.innerHTML = `
+            <label class="option-main">
+              <input type="checkbox" ${checked ? 'checked' : ''} />
+              <span class="option-letter">${opt.letter}.</span>
+              <span class="option-text"></span>
+            </label>
+            ${mode === 'edit' ? '<div class="option-tag">(poprawna)</div>' : ''}
+          `;
+
+          optRow.querySelector('.option-text').textContent = opt.text;
+
+          const checkbox = optRow.querySelector('input');
+          checkbox.addEventListener('change', () => {
+            if (mode === 'edit') {
+              if (!answerKey[qIndex]) answerKey[qIndex] = {};
+              answerKey[qIndex][optKey] = checkbox.checked;
+            } else {
+              if (!attempt.answers[qIndex]) attempt.answers[qIndex] = {};
+              attempt.answers[qIndex][optKey] = checkbox.checked;
+            }
+            saveAll();
+            if (attempt.showResults && mode === 'quiz') render();
+          });
+
+          optionsEl.appendChild(optRow);
+        });
+
+        root.appendChild(card);
+      });
+
+      if (window.MathJax?.typesetPromise) {
+        window.MathJax.typesetPromise();
+      }
+    }
+
+    function setKeyStatus(message) {
+      const el = document.getElementById('key-status');
+      if (el) el.textContent = message || '';
+    }
+
+    document.getElementById('toggle-mode').addEventListener('click', () => {
+      setMode(mode === 'edit' ? 'quiz' : 'edit');
+    });
+
+    document.getElementById('new-attempt').addEventListener('click', () => {
+      resetAttempt(true);
+    });
+
+    document.getElementById('reset-answers').addEventListener('click', () => {
+      resetAttempt(false);
+    });
+
+    document.getElementById('show-results').addEventListener('click', () => {
+      if (mode === 'edit') return;
+      attempt.showResults = true;
+      saveAll();
+      render();
+    });
+
+    document.getElementById('clear-key').addEventListener('click', () => {
+      answerKey = {};
+      saveAll();
+      render();
+    });
+
+    const keyInput = document.getElementById('answer-key-input');
+    const keyStatus = document.getElementById('key-status');
+
+    document.getElementById('generate-key').addEventListener('click', () => {
+      const value = encodeKey(answerKey);
+      keyInput.value = value;
+      keyInput.select();
+      setKeyStatus('Klucz wygenerowany.');
+    });
+
+    document.getElementById('load-key').addEventListener('click', () => {
+      const parsed = decodeKey(keyInput.value);
+      if (!parsed) {
+        setKeyStatus('Nieprawidłowy klucz.');
+        return;
+      }
+      answerKey = parsed;
+      saveAll();
+      render();
+      setKeyStatus('Klucz wczytany.');
+    });
+
+    render();
+  </script>
+</body>
+</html>
